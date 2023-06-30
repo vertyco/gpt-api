@@ -1,20 +1,21 @@
 FROM python:3.11
 LABEL maintainer="Vertyco#0117"
 
-WORKDIR /
+WORKDIR /src
 
 # Copy scripts to the folder
-COPY /src /src
+COPY src/ .
 COPY requirements.txt requirements.txt
-COPY entrypoint.sh entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
 # Install dependencies
 RUN pip install -U pip setuptools wheel && \
     pip install --no-cache-dir --upgrade -r requirements.txt
 
-ENV PYTHONPATH=/
-ENV PYTHONUNBUFFERED=1
-ENV HOST=127.0.0.1
-ENV WORKERS=1
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
 
-CMD python -m uvicorn src.api:app --host $HOST --workers $WORKERS
+ENV PYTHONPATH=/src
+ENV PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["/entrypoint.sh"]
