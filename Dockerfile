@@ -6,6 +6,7 @@ WORKDIR /
 # Copy scripts to the folder
 COPY /src /src
 COPY requirements.txt requirements.txt
+COPY entrypoint.sh entrypoint.sh
 
 # Install dependencies
 RUN pip install -U pip setuptools wheel && \
@@ -13,7 +14,7 @@ RUN pip install -U pip setuptools wheel && \
 
 ENV PYTHONPATH=/src/
 ENV PYTHONUNBUFFERED=1
-ENV WORKERS=1
-ENV HOST=127.0.0.1
 
-CMD python -m uvicorn src.api:app --host $HOST --workers $WORKERS
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
