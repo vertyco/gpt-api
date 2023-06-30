@@ -74,7 +74,7 @@ async def startup_event():
         model = GPT4All(
             model_name=config.MODEL_NAME,
             model_path=config.MODEL_PATH,
-            n_threads=int(config.THREADS) if config.THREADS else None,
+            # n_threads=int(config.THREADS) if config.THREADS else None,
         )
         # embedder = SentenceTransformer(config.EMBED_MODEL)
 
