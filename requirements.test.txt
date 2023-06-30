@@ -1,0 +1,4 @@
+httpx
+openai
+pre-commit
+pytest
