@@ -1,34 +1,16 @@
 import asyncio
-import os
-from configparser import ConfigParser
-from pathlib import Path
+import logging
 from typing import List, Optional, Union
 
 from fastapi import FastAPI
-from gpt4all import GPT4All
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 
-from src.logger import init_logging
+import config
+from src.logger import init_logging, init_sentry
 
-app = FastAPI()
-init_logging()
-root = os.path.dirname(os.path.abspath(__file__))
-
-parser = ConfigParser()
-parser.read(Path(root) / "config.ini")
-settings = parser["Settings"]
-model_name = settings.get("ModelName", fallback="nous-hermes-13b.ggmlv3.q4_0.bin")
-model_path = settings.get("ModelPath", fallback=None)
-threads = settings.getint("Threads", fallback=None)
-
-embed_model = settings.get("EmbedModel", fallback="all-MiniLM-L12-v2")
-low_mem = settings.getboolean("LowMemory", fallback=True)
-
-if not model_path:
-    model_path = None
-if not threads:
-    threads = None
+log = logging.getLogger(__name__)
+app = FastAPI(title="GPT API")
 
 
 class ChatInput(BaseModel):
@@ -68,14 +50,36 @@ async def chat(payload: ChatInput) -> dict:
 
 
 @app.post("/v1/embeddings")
-async def embed(payload: EmbedInput):
-    await asyncio.to_thread(embedder.encode, payload.input)
+async def embed(payload: EmbedInput) -> dict:
+    embedding = await asyncio.to_thread(embedder.encode, payload.input)
+    response = {
+        "object": "list",
+        "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
+        "model": config.EMBED_MODEL,
+        "usage": {"prompt_tokens": 0, "total_tokens": 0},
+    }
+    return response
 
 
 @app.on_event("startup")
 async def startup_event():
-    init_logging()
-    global model
-    model = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
-    global embedder
-    embedder = SentenceTransformer(embed_model)
+    def _run():
+        # Run in executor as to not block
+        global model
+        log.info(f"Downloading/fetching model: {config.MODEL_NAME}")
+        from gpt4all import GPT4All
+
+        model = GPT4All(
+            model_name=config.MODEL_NAME,
+            model_path=config.MODEL_PATH,
+            n_threads=config.THREADS,
+        )
+
+        global embedder
+        embedder = SentenceTransformer(config.EMBED_MODEL)
+
+    await asyncio.to_thread(_run)
+
+
+init_logging()
+init_sentry(config.SENTRY_DSN)

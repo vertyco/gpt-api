@@ -1,5 +1,7 @@
-colorama
 fastapi
 gpt4all
+python-decouple
+python-dotenv
 sentence-transformers
+sentry_sdk
 uvicorn
