@@ -25,13 +25,10 @@ threads = settings.getint("Threads", fallback=None)
 embed_model = settings.get("EmbedModel", fallback="all-MiniLM-L12-v2")
 low_mem = settings.getboolean("LowMemory", fallback=True)
 
-if not threads:
-    threads = None
 if not model_path:
     model_path = None
-
-gpt: GPT4All = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
-embedder: SentenceTransformer = SentenceTransformer(embed_model)
+if not threads:
+    threads = None
 
 
 class ChatInput(BaseModel):
@@ -78,3 +75,7 @@ async def embed(payload: EmbedInput):
 @app.on_event("startup")
 async def startup_event():
     init_logging()
+    global gpt
+    gpt: GPT4All = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
+    global embedder
+    embedder: SentenceTransformer = SentenceTransformer(embed_model)
