@@ -44,8 +44,5 @@ def init_logging():
     debug_file_handler.setFormatter(log_format)
     debug_file_handler.setLevel(logging.DEBUG)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        datefmt=datefmt,
-        handlers=[stdout_handler, info_file_handler, debug_file_handler],
-    )
+    for handler in [stdout_handler, info_file_handler, debug_file_handler]:
+        logging.getLogger("uvicorn").addHandler(handler)

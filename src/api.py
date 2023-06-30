@@ -73,3 +73,8 @@ async def chat(payload: ChatInput) -> dict:
 @app.post("/v1/embeddings")
 async def embed(payload: EmbedInput):
     await asyncio.to_thread(embedder.encode, payload.input)
+
+
+@app.on_event("startup")
+async def startup_event():
+    init_logging()
