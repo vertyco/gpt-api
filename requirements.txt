@@ -1,3 +1,4 @@
+colorama
 fastapi
 gpt4all
 sentence-transformers
