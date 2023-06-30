@@ -4,10 +4,12 @@ from typing import List, Optional, Union
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 
 import src.config as config
 from src.logger import init_logging, init_sentry
+
+# from sentence_transformers import SentenceTransformer
+
 
 log = logging.getLogger(__name__)
 app = FastAPI(title="GPT API")
@@ -49,16 +51,16 @@ async def chat(payload: ChatInput) -> dict:
     return await asyncio.to_thread(_run)
 
 
-@app.post("/v1/embeddings")
-async def embed(payload: EmbedInput) -> dict:
-    embedding = await asyncio.to_thread(embedder.encode, payload.input)
-    response = {
-        "object": "list",
-        "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
-        "model": config.EMBED_MODEL,
-        "usage": {"prompt_tokens": 0, "total_tokens": 0},
-    }
-    return response
+# @app.post("/v1/embeddings")
+# async def embed(payload: EmbedInput) -> dict:
+#     embedding = await asyncio.to_thread(embedder.encode, payload.input)
+#     response = {
+#         "object": "list",
+#         "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
+#         "model": config.EMBED_MODEL,
+#         "usage": {"prompt_tokens": 0, "total_tokens": 0},
+#     }
+#     return response
 
 
 @app.on_event("startup")
@@ -76,5 +78,5 @@ async def startup_event():
         n_threads=int(config.THREADS) if config.THREADS else None,
     )
 
-    global embedder
-    embedder = SentenceTransformer(config.EMBED_MODEL)
+    # global embedder
+    # embedder = SentenceTransformer(config.EMBED_MODEL)

@@ -3,6 +3,6 @@ fastapi
 gpt4all
 python-decouple
 python-dotenv
-sentence-transformers
+# sentence-transformers
 sentry_sdk
 uvicorn
