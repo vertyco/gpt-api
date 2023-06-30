@@ -8,7 +8,7 @@ COPY requirements.txt .
 RUN pip install -U pip setuptools wheel
 RUN pip install -r requirements.txt
 
-COPY src /src
+COPY ./src ./src
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
