@@ -3,14 +3,12 @@ LABEL maintainer="Vertyco#0117"
 
 WORKDIR /app
 
-# Copy scripts to the folder
-COPY src/ ./src
+# Put first so anytime this file changes other cached layers are invalidated.
 COPY requirements.txt .
-COPY entrypoint.sh .
+RUN pip install -U pip setuptools wheel
+RUN pip install -r requirements.txt
 
-# Install dependencies
-RUN pip install -U pip setuptools wheel && \
-    pip install --no-cache-dir --upgrade -r requirements.txt
+COPY src /src
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
