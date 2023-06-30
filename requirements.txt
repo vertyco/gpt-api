@@ -1,6 +1,6 @@
 aiohttp
 fastapi
-gpt4all==0.3.5
+gpt4all==0.3.3
 python-decouple
 python-dotenv
 # sentence-transformers
