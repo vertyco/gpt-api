@@ -12,9 +12,9 @@ from src.logger import init_logging, init_sentry
 # from sentence_transformers import SentenceTransformer
 
 log = logging.getLogger(__name__)
-
-
 app = FastAPI(title="GPT API")
+model: GPT4All = None
+embedder = None
 
 
 class ChatInput(BaseModel):
@@ -50,6 +50,8 @@ async def chat(payload: ChatInput) -> dict:
             streaming=False,
         )
 
+    if not model:
+        return {"status": 500}
     return await asyncio.to_thread(_run)
 
 
