@@ -10,3 +10,4 @@ services:
       - 8100:8100
     env_file:
       - stack.env
+    pull_policy: build
