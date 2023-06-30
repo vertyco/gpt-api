@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 
 log = logging.getLogger(__name__)
 app = FastAPI(title="GPT API")
-root = Path(os.path.dirname(os.path.abspath(__file__))).parent
+model_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / "models"
 
 
 class ChatInput(BaseModel):
@@ -78,8 +78,8 @@ async def startup_event():
         global model
         model = GPT4All(
             model_name=config.MODEL_NAME,
-            model_path=root.__str__(),
-            # n_threads=int(config.THREADS) if config.THREADS else None,
+            model_path=model_path.__str__(),
+            n_threads=int(config.THREADS) if config.THREADS else None,
         )
         # embedder = SentenceTransformer(config.EMBED_MODEL)
 
