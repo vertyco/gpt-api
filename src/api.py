@@ -56,7 +56,7 @@ class EmbedInput(BaseModel):
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
     def _run() -> dict:
-        return gpt.chat_completion(
+        return model.chat_completion(
             messages=payload.messages,
             temp=payload.temperature,
             top_p=payload.top_p,
@@ -75,7 +75,7 @@ async def embed(payload: EmbedInput):
 @app.on_event("startup")
 async def startup_event():
     init_logging()
-    global gpt
-    gpt: GPT4All = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
+    global model
+    model = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
     global embedder
-    embedder: SentenceTransformer = SentenceTransformer(embed_model)
+    embedder = SentenceTransformer(embed_model)
