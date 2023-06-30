@@ -4,4 +4,4 @@
 exec uvicorn src.api:app \
     --host ${HOST:-127.0.0.1} \
     --port ${PORT:-8000} \
-    --workers ${UVICORN_WORKERS:-1}
+    --workers ${WORKERS:-1}
