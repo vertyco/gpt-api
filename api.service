@@ -5,7 +5,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=path -O -m uvicorn gpt_api:app --workers 2
+ExecStart=path -O -m uvicorn src.api:app --workers 2
 User=username
 Group=username
 Type=idle

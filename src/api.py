@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 from fastapi import FastAPI
 from gpt4all import GPT4All
 from pydantic import BaseModel
+from sentence_transformers import SentenceTransformer
 
 app = FastAPI()
 
@@ -19,12 +20,16 @@ model_name = settings.get("ModelName", fallback="nous-hermes-13b.ggmlv3.q4_0.bin
 model_path = settings.get("ModelPath", fallback=None)
 threads = settings.getint("Threads", fallback=None)
 
+embed_model = settings.get("EmbedModel", fallback="all-MiniLM-L12-v2")
+low_mem = settings.getboolean("LowMemory", fallback=True)
+
 if not threads:
     threads = None
 if not model_path:
     model_path = None
 
 gpt: GPT4All = GPT4All(model_name=model_name, model_path=model_path, n_threads=threads)
+embedder: SentenceTransformer = SentenceTransformer(embed_model)
 
 
 class ChatInput(BaseModel):
@@ -44,16 +49,25 @@ class ChatInput(BaseModel):
     user: Optional[str] = None
 
 
-def _get_response(payload: ChatInput) -> dict:
-    return gpt.chat_completion(
-        messages=payload.messages,
-        temp=payload.temperature,
-        top_p=payload.top_p,
-        verbose=False,
-        streaming=False,
-    )
+class EmbedInput(BaseModel):
+    model: str
+    input: str
 
 
-@app.post("/chat/completions")
+@app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
-    return await asyncio.to_thread(_get_response, payload)
+    def _run() -> dict:
+        return gpt.chat_completion(
+            messages=payload.messages,
+            temp=payload.temperature,
+            top_p=payload.top_p,
+            verbose=False,
+            streaming=False,
+        )
+
+    return await asyncio.to_thread(_run)
+
+
+@app.post("/v1/embeddings")
+async def embed(payload: EmbedInput):
+    await asyncio.to_thread(embedder.encode, payload.input)
