@@ -30,7 +30,7 @@ if not threads:
 if not model_path:
     model_path = None
 
-gpt: GPT4All = GPT4All(model_name=model_name, model_path=model_path, n_threads=threads)
+gpt: GPT4All = GPT4All(model_name=model_name.strip(), model_path=model_path, n_threads=threads)
 embedder: SentenceTransformer = SentenceTransformer(embed_model)
 
 
