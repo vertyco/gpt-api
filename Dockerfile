@@ -12,9 +12,6 @@ COPY entrypoint.sh .
 RUN pip install -U pip setuptools wheel && \
     pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Make the entrypoint script executable
-RUN chmod +x entrypoint.sh
-
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV HOST=127.0.0.1
