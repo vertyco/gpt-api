@@ -17,5 +17,7 @@ RUN chmod +x entrypoint.sh
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV HOST=127.0.0.1
+ENV WORKERS=1
 
-ENTRYPOINT ["./entrypoint.sh"]
+CMD python -m uvicorn api:app --host $HOST --workers $WORKERS
