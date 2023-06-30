@@ -12,7 +12,7 @@ COPY entrypoint.sh entrypoint.sh
 RUN pip install -U pip setuptools wheel && \
     pip install --no-cache-dir --upgrade -r requirements.txt
 
-ENV PYTHONPATH=/src/
+ENV PYTHONPATH=/
 ENV PYTHONUNBUFFERED=1
 ENV HOST=127.0.0.1
 ENV WORKERS=1
