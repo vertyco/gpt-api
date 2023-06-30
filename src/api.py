@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 
-import config
+import src.config as config
 from src.logger import init_logging, init_sentry
 
 log = logging.getLogger(__name__)
