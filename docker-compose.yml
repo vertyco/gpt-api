@@ -11,10 +11,3 @@ services:
     env_file:
       - stack.env
     pull_policy: build
-    networks:
-      - default
-
-networks:
-  default:
-    external:
-      name: bridge
