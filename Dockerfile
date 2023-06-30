@@ -14,7 +14,7 @@ RUN pip install -U pip setuptools wheel && \
 
 ENV PYTHONPATH=/src/
 ENV PYTHONUNBUFFERED=1
+ENV HOST=127.0.0.1
+ENV WORKERS=1
 
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT ["./entrypoint.sh"]
+CMD python -m uvicorn src.api:app --host $HOST --workers $WORKERS

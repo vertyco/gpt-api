@@ -8,3 +8,5 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 8100:8100
+    env_file:
+      - stack.env
