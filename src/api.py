@@ -9,8 +9,10 @@ from gpt4all import GPT4All
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 
-app = FastAPI()
+from src.logger import init_logging
 
+app = FastAPI()
+init_logging()
 root = os.path.dirname(os.path.abspath(__file__))
 
 parser = ConfigParser()
