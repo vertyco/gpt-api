@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 HOST = config("HOST", default="127.0.0.1")
-UVICORN_WORKERS = config("UVICORN_WORKERS", default="1")
+WORKERS = config("WORKERS", default=1, cast=int)
 
 SENTRY_DSN = config("SENTRY_DSN", default=None)
 LOGS_PATH = config("LOGS_PATH", default="")
