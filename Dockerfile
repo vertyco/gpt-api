@@ -13,5 +13,7 @@ RUN pip install -U pip setuptools wheel && \
 
 ENV PYTHONPATH=/src/
 ENV PYTHONUNBUFFERED=1
+ENV WORKERS=1
+ENV HOST=127.0.0.1
 
-CMD python -m uvicorn src.api:app --host $HOST --port $PORT --workers $WORKERS
+CMD python -m uvicorn src.api:app --host $HOST --workers $WORKERS
