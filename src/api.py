@@ -78,8 +78,6 @@ async def startup_event():
         global embedder
         embedder = SentenceTransformer(config.EMBED_MODEL)
 
+    init_logging()
+    init_sentry(config.SENTRY_DSN)
     await asyncio.to_thread(_run)
-
-
-init_logging()
-init_sentry(config.SENTRY_DSN)

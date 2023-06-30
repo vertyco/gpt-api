@@ -1,7 +1,5 @@
 FROM python:3.11
 LABEL maintainer="Vertyco#0117"
-FROM python:3.11
-LABEL maintainer="Vertyco#0117"
 
 WORKDIR /app
 
