@@ -4,7 +4,7 @@ from logging.handlers import RotatingFileHandler
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
-import config
+import src.config as config
 
 
 def init_logging():
