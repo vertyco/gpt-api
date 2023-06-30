@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 log = logging.getLogger(__name__)
 app = FastAPI(title="GPT API")
 model_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / "models"
+model_path.mkdir(exist_ok=True)
 
 
 class ChatInput(BaseModel):
