@@ -1,7 +1,7 @@
 FROM python:3.11
 LABEL maintainer="Vertyco#0117"
 
-WORKDIR /src
+WORKDIR /
 
 # Copy scripts to the folder
 COPY /src /src
