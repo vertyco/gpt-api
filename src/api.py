@@ -11,9 +11,11 @@ from pydantic import BaseModel
 try:
     import src.config as config
     from src.logger import init_logging, init_sentry
+    from src.utils import compile_messages
 except ModuleNotFoundError:
     import config
     from logger import init_logging, init_sentry
+    from utils import compile_messages
 
 from sentence_transformers import SentenceTransformer
 
@@ -48,13 +50,19 @@ class EmbedInput(BaseModel):
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
     def _run() -> dict:
-        return model.chat_completion(
-            messages=payload.messages,
+        output = model.generate(
+            prompt=compile_messages(payload.messages),
+            max_tokens=payload.max_tokens,
             temp=payload.temperature,
             top_p=payload.top_p,
-            verbose=False,
-            streaming=False,
         )
+        response = {
+            "object": "list",
+            "choices": [{"message": {"content": output}}],
+            "model": config.EMBED_MODEL,
+            "usage": {"prompt_tokens": 0, "total_tokens": 0},
+        }
+        return response
 
     if not model:
         return {"status": 500, "message": "Model not initialized!"}

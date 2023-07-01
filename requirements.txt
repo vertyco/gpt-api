@@ -1,3 +1,4 @@
+aiohttp
 fastapi
 gpt4all
 python-decouple
