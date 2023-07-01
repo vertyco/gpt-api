@@ -35,7 +35,7 @@ def compile_messages(
         content = message["content"].strip()
         if message["role"] == "user":
             if content.startswith("Context"):
-                user_message = "\n### Context: " + content
+                user_message = "\n### " + content
             else:
                 user_message = "\n### User: " + content
             full_prompt += user_message
