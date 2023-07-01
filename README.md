@@ -1,14 +1,88 @@
-# GPTAPI
+# API for GPT4All (Getting Started)
 
-GPT API for the Assistant cog or other uses
+## Deploying as a service (Ubuntu 22.04)
 
-# Deploying as a service
+_Run the following commands to get the api up and running on your server_
 
-To deply as a service, pull the repo and copy `example.env` to `.env` and edit to your liking.
+### Upgrade and update Ubuntu to the latest version
 
-1. `sudo nano /etc/systemd/system/gptapi.service`
+```
+sudo apt update && sudo apt upgrade -y
+```
 
-2.
+### Upgrade and update Ubuntu to the latest version
+
+```
+sudo apt install wget build-essential libncursesw5-dev libssl-dev \
+libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev git
+```
+
+### Download python 3.11
+
+```
+sudo add-apt-repository ppa:deadsnakes/ppa
+```
+
+### Install
+
+```
+sudo apt install python3.11 python3.11-dev python3.11-venv
+```
+
+### Clone The Repo
+
+```
+git clone https://github.com/vertyco/gpt-api.git
+```
+
+### Create/Activate Virtual Environment
+
+```
+cd gpt-api
+
+python3.11 -m venv env
+
+source env/bin/activate
+```
+
+### Install requirements
+
+```
+pip install -U pip
+
+pip install -r requirements.txt
+```
+
+### Configure `.env` File
+
+```
+sudo nano .env
+```
+
+- Paste the following
+
+```
+SENTRY_DSN =
+LOGS_PATH =
+MODEL_NAME = orca-mini-3b.ggmlv3.q4_0.bin
+MODEL_PATH =
+THREADS =
+EMBED_MODEL = all-MiniLM-L12-v2
+LOW_MEMORY = 0
+```
+
+- Press `CTRL + O` to save, then `CRTL + X` to close out
+
+### Setup Service File
+
+```
+sudo nano /etc/systemd/system/gptapi.service
+```
+
+- Paste the following.
+- Change `username` to your username
+- Set `workers` to however many you want
+- To open up the api to external connections, change `--host localhost` to `--host 0.0.0.0`
 
 ```
 [Unit]
@@ -18,7 +92,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/bin/bash -c 'cd /home/username/GPTAPI/ && source env/bin/activate && python -m uvicorn  src.api:app --workers 3 --host 0.0.0.0'
+ExecStart=/bin/bash -c 'cd /home/username/gpt-api/ && source env/bin/activate && python -m uvicorn  src.api:app --workers 3 --host localhost'
 User=username
 Group=username
 Type=idle
@@ -31,17 +105,23 @@ TimeoutStopSec=10
 WantedBy=multi-user.target
 ```
 
-3. `sudo systemctl daemon-reload`
-4. `sudo systemctl enable gptapi`
-5. `sudo systemctl start gptapi`
-   <br/>to check status<br/>
-6. `sudo systemctl status gptapi`
+- Press `CTRL + O` to save, then `CRTL + X` to close out
 
-<br/>
+### Enable/Start Service
 
-# Deploying with docker-compose on portainer
+```
+sudo systemctl daemon-reload
 
-If using portainer's env variables, use `stack.env` for the `env_file` arg, otherwise specify the path to your env file
+sudo systemctl enable gptapi
+
+sudo systemctl start gptapi
+```
+
+# Deploying on Portainer with docker-compose
+
+If using portainer's env variables, use `stack.env` for the `env_file` arg, otherwise specify the path to your env file.
+
+## Pulling from docker images
 
 ```yml
 version: "3.8"
@@ -56,6 +136,10 @@ services:
       - stack.env
 ```
 
-# If running on a VM
+## Building from repo
 
-- Make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings
+The repo's docker-compose file can be used with the `Repository` option in Portainers stack UI which will build the image from source.
+
+# NOTES
+
+- If running on a VM, make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings
