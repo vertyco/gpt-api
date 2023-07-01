@@ -50,8 +50,10 @@ class EmbedInput(BaseModel):
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
     def _run() -> dict:
+        prompt = compile_messages(payload.messages)
+        log.debug(f"Incoming prompt: {prompt}")
         output = model.generate(
-            prompt=compile_messages(payload.messages),
+            prompt=prompt,
             max_tokens=payload.max_tokens,
             temp=payload.temperature,
             top_p=payload.top_p,
