@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import List, Optional, Union
 
+import uvicorn
 from fastapi import FastAPI
 from gpt4all import GPT4All
 from pydantic import BaseModel
@@ -54,7 +55,7 @@ async def chat(payload: ChatInput) -> dict:
         log.debug(f"Incoming prompt: {prompt}")
         output = model.generate(
             prompt=prompt,
-            max_tokens=payload.max_tokens,
+            max_tokens=config.MAX_TOKENS,
             temp=payload.temperature,
             top_p=payload.top_p,
         )
@@ -73,10 +74,11 @@ async def chat(payload: ChatInput) -> dict:
 
 @app.post("/v1/embeddings")
 async def embed(payload: EmbedInput) -> dict:
+    log.debug(f"Incoming text: {payload.input}")
     embedding = await asyncio.to_thread(embedder.encode, payload.input)
     response = {
         "object": "list",
-        "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
+        "data": [{"object": "embedding", "embedding": embedding.tolist(), "index": 0}],
         "model": config.EMBED_MODEL,
         "usage": {"prompt_tokens": 0, "total_tokens": 0},
     }
@@ -99,3 +101,7 @@ async def startup_event():
     init_sentry(config.SENTRY_DSN)
     log.info(f"Downloading/fetching model: {config.MODEL_NAME}")
     await asyncio.to_thread(_run)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app=app, host="0.0.0.0")
