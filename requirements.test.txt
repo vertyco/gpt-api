@@ -1,3 +1,5 @@
+
+einops
 httpx
 openai
 pre-commit
