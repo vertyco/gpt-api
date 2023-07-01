@@ -32,14 +32,15 @@ def compile_messages(
         \n### Prompt: """
 
     for message in messages:
+        content = message["content"].strip()
         if message["role"] == "user":
-            if message["content"].startswith("Context"):
-                user_message = "\n### Context: " + message["content"]
+            if content.startswith("Context"):
+                user_message = "\n### Context: " + content
             else:
-                user_message = "\n### User: " + message["content"]
+                user_message = "\n### User: " + content
             full_prompt += user_message
         if message["role"] == "assistant":
-            assistant_message = "\n### Response: " + message["content"]
+            assistant_message = "\n### Response: " + content
             full_prompt += assistant_message
 
     if default_prompt_footer:
