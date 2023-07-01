@@ -4,9 +4,10 @@ LABEL maintainer="Vertyco#0117"
 WORKDIR /app
 
 # Put first so anytime this file changes other cached layers are invalidated.
-COPY ./requirements.txt ./
+COPY ./requirements.portainer.txt ./
 RUN pip install -U pip setuptools wheel
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.portainer.txt
+RUN pip install sentence-transformers
 
 COPY ./src ./src
 
