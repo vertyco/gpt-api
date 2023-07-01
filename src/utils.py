@@ -33,7 +33,10 @@ def compile_messages(
 
     for message in messages:
         if message["role"] == "user":
-            user_message = "\n" + message["content"]
+            if message["content"].startswith("Context"):
+                user_message = "\n### Context: " + message["content"]
+            else:
+                user_message = "\n### User: " + message["content"]
             full_prompt += user_message
         if message["role"] == "assistant":
             assistant_message = "\n### Response: " + message["content"]

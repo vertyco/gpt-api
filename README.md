@@ -18,7 +18,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/bin/bash -c 'cd /home/username/GPTAPI/ && source env/bin/activate && python -m uvicorn  src.api:app --workers 3'
+ExecStart=/bin/bash -c 'cd /home/username/GPTAPI/ && source env/bin/activate && python -m uvicorn  src.api:app --workers 3 --host 0.0.0.0'
 User=username
 Group=username
 Type=idle

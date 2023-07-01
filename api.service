@@ -5,14 +5,13 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=path -O -m uvicorn src.api:app --workers 2
+ExecStart=/bin/bash -c 'cd /home/username/GPTAPI/ && source env/bin/activate && python -m uvicorn  src.api:app --workers 3 --host 0.0.0.0'
 User=username
 Group=username
 Type=idle
 Restart=on-abnormal
 RestartSec=15
 RestartForceExitStatus=1
-RestartForceExitStatus=26
 TimeoutStopSec=10
 
 [Install]
