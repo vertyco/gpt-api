@@ -1,7 +1,0 @@
-aiohttp
-fastapi
-gpt4all
-python-decouple
-python-dotenv
-sentry_sdk
-uvicorn

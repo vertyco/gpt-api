@@ -57,7 +57,7 @@ async def chat(payload: ChatInput) -> dict:
         )
 
     if not model:
-        return {"status": 500}
+        return {"status": 500, "message": "Model not initialized!"}
     return await asyncio.to_thread(_run)
 
 
