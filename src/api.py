@@ -64,7 +64,7 @@ async def chat(payload: ChatInput) -> dict:
         if isinstance(model, GPT4All):
             log.debug("Using GPT4All")
             prompt = compile_messages(payload.messages)
-            print(f"Prompt: {prompt}")
+            log.debug(f"Prompt: {prompt}")
             output = model.generate(
                 prompt=prompt,
                 max_tokens=config.MAX_TOKENS,
@@ -74,9 +74,8 @@ async def chat(payload: ChatInput) -> dict:
         elif isinstance(model, QuestionAnsweringPipeline):
             log.debug("Using question-answering")
             question, context = compile_qa_messages(payload.messages)
-            print(f"Question: {question}")
-            print(f"Context: {context}")
-            question, context = compile_qa_messages(payload.messages)
+            log.debug(f"Question: {question}")
+            log.debug(f"Context: {context}")
             if context:
                 response = model(
                     question=question,
@@ -91,7 +90,7 @@ async def chat(payload: ChatInput) -> dict:
         elif isinstance(model, TextGenerationPipeline):
             log.debug("Using text-generation")
             prompt = compile_messages(payload.messages)
-            print(f"Prompt: {prompt}")
+            log.debug(f"Prompt: {prompt}")
             output = model(
                 prompt,
                 max_new_tokens=config.MAX_TOKENS,
