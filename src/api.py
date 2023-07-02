@@ -152,12 +152,13 @@ async def startup_event():
         global model
         global embedder
         global tokenizer
-
+        threads = int(config.THREADS) if config.THREADS else None
         if valid_gpt4all_model(config.MODEL_NAME, gpt4all_models):
+            log.info(f"Spinning up gpt4all model {config.MODEL_NAME} with {threads} threads")
             model = GPT4All(
                 model_name=config.MODEL_NAME,
                 model_path=model_path.__str__(),
-                n_threads=int(config.THREADS) if config.THREADS else None,
+                n_threads=threads,
             )
             tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER)
         else:
