@@ -1,7 +1,7 @@
 # API for GPT4All (Getting Started)
 
 ![Platform](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Ubuntu package](https://img.shields.io/ubuntu/v/Linux/22.04?style=for-the-badge&color=red)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-orange?style=for-the-badge&logo=ubuntu)](https://ubuntu.com/)
 
 ![Py](https://img.shields.io/badge/python-v3.11-orange?style=for-the-badge)
 ![black](https://img.shields.io/badge/style-black-000000?style=for-the-badge&?link=https://github.com/psf/black)
