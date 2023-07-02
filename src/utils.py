@@ -4,9 +4,12 @@ def compile_messages(messages: list[dict]) -> str:
     for message in messages:
         role = message["role"]
         content = message["content"]
-        prompt += f"### {role.upper()}: {content.strip()}\n"
+        if "### Context:" in content:
+            prompt += f"{content.strip()}\n"
+        else:
+            prompt += f"### {role.upper()}:\n{content.strip()}\n"
 
-    prompt += "### Response:"
+    prompt += "### Response:\n"
     return prompt
 
 
@@ -25,9 +28,9 @@ def compile_qa_messages(messages: list[dict]) -> tuple[str, str]:
         if "### Context:" in content:
             context += f"{content.replace('### Context:', '').strip()}\n"
         elif message["role"] == "user":
-            prompt += f"### Prompt: {content}\n"
+            prompt += f"### Prompt:\n{content}\n"
         elif message["role"] == "assistant":
-            prompt += f"### Response: {content}\n"
+            prompt += f"### Response:\n{content}\n"
 
     return prompt, f"{system}{context}"
 
