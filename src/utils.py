@@ -1,13 +1,29 @@
 def compile_messages(messages: list[dict]) -> str:
+    system = ""
     prompt = ""
 
+    # Dump system messages first
     for message in messages:
         role = message["role"]
         content = message["content"]
+        if role != "system":
+            continue
+        system += content
+
+    if system:
+        prompt += f"### Instruction:\n{system}\n### Prompt"
+
+    # Dump context
+    for message in messages:
+        role = message["role"]
+        content = message["content"]
+        if role == "system":
+            continue
         if "### Context:" in content:
             prompt += f"{content.strip()}\n"
         else:
-            prompt += f"### {role.upper()}:\n{content.strip()}\n"
+            name = "Assistant" if role == "assistant" else "Human"
+            prompt += f"### {name}:\n{content.strip()}\n"
 
     prompt += "### Response:\n"
     return prompt
