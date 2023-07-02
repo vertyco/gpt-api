@@ -1,17 +1,13 @@
 # API for GPT4All (Getting Started)
 
 ![Platform](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-orange?style=for-the-badge&logo=ubuntu)](https://ubuntu.com/)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-blueviolet?style=for-the-badge&logo=ubuntu)](https://ubuntu.com/)
 
-![Py](https://img.shields.io/badge/python-v3.11-orange?style=for-the-badge)
+![Py](https://img.shields.io/badge/python-v3.11-yellow?style=for-the-badge)
 ![black](https://img.shields.io/badge/style-black-000000?style=for-the-badge&?link=https://github.com/psf/black)
 
 ![license](https://img.shields.io/github/license/Vertyco/Vrt-Cogs?style=for-the-badge)
-![GitHub repo size](https://img.shields.io/github/repo-size/Vertyco/gpt-api?color=blueviolet&style=for-the-badge)
-
-![Forks](https://img.shields.io/github/forks/Vertyco/gpt-api?style=for-the-badge&color=9cf)
-![Stars](https://img.shields.io/github/stars/Vertyco/gpt-api?style=for-the-badge&color=yellow)
-![Lines of code](https://img.shields.io/tokei/lines/github/Vertyco/gpt-api?color=ff69b4&label=Lines&style=for-the-badge)
+![GitHub repo size](https://img.shields.io/github/repo-size/Vertyco/gpt-api?color=cyan&style=for-the-badge)
 
 ## Deploying as a service (Ubuntu 22.04)
 
@@ -75,11 +71,15 @@ sudo nano .env
 - Paste the following
 
 ```
+# logging
 SENTRY_DSN =
 LOGS_PATH =
+# chat
 MODEL_NAME = orca-mini-3b.ggmlv3.q4_0.bin
 MODEL_PATH =
 THREADS =
+MAX_TOKENS = 750
+# embeddings
 EMBED_MODEL = all-MiniLM-L12-v2
 LOW_MEMORY = 0
 ```
@@ -155,7 +155,13 @@ The repo's docker-compose file can be used with the `Repository` option in Porta
 
 # NOTES
 
-- If running on a VM, make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings
+- If running on a VM, make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings.
+- Run `sudo systemctl status gptapi` to check the service's status
+- To view debugging info as it comes in, while in the project root run `tail -f debug-logs.log`
+
+<br/>
+<br/>
 
 _This API was written for the Assistant cog for Red Discord-Bot_
+
 ![Discord](https://img.shields.io/discord/133049272517001216?style=for-the-badge&label=Red%20Discord-Bot&color=red)
