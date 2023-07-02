@@ -1,5 +1,5 @@
 def compile_messages(
-    messages: list, default_prompt_header=True, default_prompt_footer=True
+    messages: list[dict], default_prompt_header=True, default_prompt_footer=True
 ) -> str:
     # Yoinked from https://github.com/nomic-ai/gpt4all/blob/main/gpt4all-bindings/python/gpt4all/gpt4all.py#L260
     """
@@ -26,10 +26,12 @@ def compile_messages(
             full_prompt += system_message
 
     if default_prompt_header:
-        full_prompt += """### Instruction:
-        The prompt below is a question to answer, a task to complete, or a conversation
-        to respond to; decide which and write an appropriate response.
-        \n### Prompt: """
+        full_prompt += (
+            "### Instruction:\n"
+            "The prompt below is a question to answer, a task to complete, or a conversation"
+            "to respond to; decide which and write an appropriate response.\n"
+            "### Prompt:"
+        )
 
     for message in messages:
         content = message["content"].strip()
@@ -42,4 +44,34 @@ def compile_messages(
     if default_prompt_footer:
         full_prompt += "\n### Response:"
 
-    return full_prompt
+    return full_prompt.strip()
+
+
+def compile_qa_messages(messages: list[dict]) -> tuple[str, str]:
+    context = ""
+    prompt = ""
+    for message in messages:
+        if message["role"] == "system":
+            system_message = "### Instruction:\n" + message["content"] + "\n"
+            context += system_message
+
+    for message in messages:
+        if message["role"] == "system":
+            continue
+        content = message["content"].strip()
+        if "### Context:" in content:
+            context += f"{content.replace('### Context:', '').strip()}\n"
+        elif message["role"] == "user":
+            prompt += f"{content}\n"
+        elif message["role"] == "assistant":
+            context += f"### Response: {content}\n"
+
+    return prompt, context
+
+
+def valid_gpt4all_model(model_name: str, models: dict) -> bool:
+    for i in models:
+        if model_name.lower() == i["filename"].lower():
+            return True
+    else:
+        return False

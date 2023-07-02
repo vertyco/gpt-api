@@ -68,17 +68,24 @@ pip install -r requirements.txt
 sudo nano .env
 ```
 
-- Paste the following
+- Paste the example env and edit as desired
 
 ```
+# uvicorn
+HOST = 127.0.0.1
+UVICORN_WORKERS = 1
+
 # logging
 SENTRY_DSN =
 LOGS_PATH =
-# chat
+
+# Either a GPT4All or huggingface Q&A model
 MODEL_NAME = orca-mini-3b.ggmlv3.q4_0.bin
-THREADS =
+# Must be a huggingface model for tokenizing (only used with GPT4All models)
+TOKENIZER = deepset/roberta-base-squad2
+THREADS = 1
 MAX_TOKENS = 750
-# embeddings
+# huggingface embeddings model
 EMBED_MODEL = all-MiniLM-L12-v2
 LOW_MEMORY = 0
 ```
@@ -157,6 +164,7 @@ The repo's docker-compose file can be used with the `Repository` option in Porta
 - If running on a VM, make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings.
 - Run `sudo systemctl status gptapi` to check the service's status
 - To view debugging info as it comes in, while in the project root run `tail -f debug-logs.log`
+- The
 
 <br/>
 <br/>

@@ -8,22 +8,26 @@ import uvicorn
 from fastapi import FastAPI
 from gpt4all import GPT4All
 from pydantic import BaseModel
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer, pipeline
+from transformers.pipelines.question_answering import QuestionAnsweringPipeline
+from transformers.pipelines.text_generation import TextGenerationPipeline
 
 try:
     import src.config as config
     from src.logger import init_logging, init_sentry
-    from src.utils import compile_messages
+    from src.utils import compile_messages, compile_qa_messages, valid_gpt4all_model
 except ModuleNotFoundError:
     import config
     from logger import init_logging, init_sentry
-    from utils import compile_messages
+    from utils import compile_messages, compile_qa_messages, valid_gpt4all_model
 
-from sentence_transformers import SentenceTransformer
 
 log = logging.getLogger(__name__)
 app = FastAPI(title="GPT API")
 model_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / "models"
 model_path.mkdir(exist_ok=True)
+gpt4all_models = GPT4All.list_models()
 
 
 class ChatInput(BaseModel):
@@ -48,17 +52,55 @@ class EmbedInput(BaseModel):
     input: str
 
 
+class Tokenizing(BaseModel):
+    text: str = None
+    tokens: list = None
+
+
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
     def _run() -> dict:
-        prompt = compile_messages(payload.messages)
-        log.debug(f"Incoming prompt: {prompt}")
-        output = model.generate(
-            prompt=prompt,
-            max_tokens=config.MAX_TOKENS,
-            temp=payload.temperature,
-            top_p=payload.top_p,
-        )
+        output = ""
+        if isinstance(model, GPT4All):
+            log.debug("Using GPT4All")
+            prompt = compile_messages(payload.messages)
+            print(f"Prompt: {prompt}")
+            output = model.generate(
+                prompt=prompt,
+                max_tokens=config.MAX_TOKENS,
+                temp=payload.temperature,
+                top_p=payload.top_p,
+            )
+        elif isinstance(model, QuestionAnsweringPipeline):
+            log.debug("Using question-answering")
+            question, context = compile_qa_messages(payload.messages)
+            print(f"Question: {question}")
+            print(f"Context: {context}")
+            question, context = compile_qa_messages(payload.messages)
+            if context:
+                response = model(
+                    question=question,
+                    context=context,
+                    max_tokens=config.MAX_TOKENS,
+                    max_length=config.MAX_TOKENS,
+                    temperature=payload.temperature,
+                )
+                output = response["answer"] if response else ""
+            else:
+                output = "No context found!"
+        elif isinstance(model, TextGenerationPipeline):
+            log.debug("Using text-generation")
+            prompt = compile_messages(payload.messages)
+            print(f"Prompt: {prompt}")
+            output = model(
+                prompt,
+                max_new_tokens=config.MAX_TOKENS,
+                use_cache=True,
+                max_tokens=config.MAX_TOKENS,
+                max_length=config.MAX_TOKENS,
+                temperature=payload.temperature,
+            )
+        log.debug(f"Output: {output}")
         response = {
             "object": "list",
             "choices": [{"message": {"content": output}}],
@@ -85,23 +127,58 @@ async def embed(payload: EmbedInput) -> dict:
     return response
 
 
+@app.post("/v1/tokenize")
+async def get_tokens(payload: Tokenizing) -> dict:
+    tokens = await asyncio.to_thread(tokenizer.encode, payload.text)
+    log.info(f"Tokens: {len(tokens)}")
+    return {"tokens": tokens}
+
+
+@app.post("/v1/untokenize")
+async def get_text(payload: Tokenizing) -> dict:
+    text = await asyncio.to_thread(tokenizer.convert_tokens_to_string, payload.tokens)
+    log.info(f"Text: {text}")
+    return {"text": text}
+
+
+@app.get("/v1/model")
+async def get_model() -> dict:
+    return {"model": config.MODEL_NAME, "embed_model": config.EMBED_MODEL}
+
+
 @app.on_event("startup")
 async def startup_event():
     def _run():
         global model
-        model = GPT4All(
-            model_name=config.MODEL_NAME,
-            model_path=model_path.__str__(),
-            n_threads=int(config.THREADS) if config.THREADS else None,
-        )
         global embedder
+        global tokenizer
+
+        if valid_gpt4all_model(config.MODEL_NAME, gpt4all_models):
+            model = GPT4All(
+                model_name=config.MODEL_NAME,
+                model_path=model_path.__str__(),
+                n_threads=int(config.THREADS) if config.THREADS else None,
+            )
+            tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER)
+        else:
+            model = pipeline(
+                task="question-answering",
+                model=config.MODEL_NAME,
+                tokenizer=config.MODEL_NAME,
+                low_cpu_mem_usage=config.LOW_MEMORY,
+                use_fast=True,
+            )
+            log.info(f"Model TYPE: {type(model)}")
+            tokenizer = model.tokenizer
+
         embedder = SentenceTransformer(config.EMBED_MODEL)
 
     init_logging()
     init_sentry(config.SENTRY_DSN)
     log.info(f"Downloading/fetching model: {config.MODEL_NAME}")
     await asyncio.to_thread(_run)
+    log.info("Startup complete!")
 
 
 if __name__ == "__main__":
-    uvicorn.run(app=app, host="0.0.0.0")
+    uvicorn.run(app=app, host=config.HOST if config.HOST.strip() else "localhost")
