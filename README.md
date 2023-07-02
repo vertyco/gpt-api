@@ -163,5 +163,6 @@ The repo's docker-compose file can be used with the `Repository` option in Porta
 <br/>
 
 _This API was written for the Assistant cog for Red Discord-Bot_
-
+<br/>
+[![Vrt-Cogs Repo](https://img.shields.io/badge/Repo-Vrt--Cogs-blue?style=for-the-badge)](https://github.com/Vertyco/Vrt-Cogs)
 ![Discord](https://img.shields.io/discord/133049272517001216?style=for-the-badge&label=Red%20Discord-Bot&color=red)
