@@ -11,7 +11,7 @@ def compile_messages(messages: list[dict]) -> str:
         system += content
 
     if system:
-        prompt += f"### Instruction:\n{system}\n### Prompt"
+        prompt += f"### Instruction:\n{system}\n### Prompt:\n"
 
     # Dump context
     for message in messages:
