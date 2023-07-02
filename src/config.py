@@ -11,7 +11,6 @@ SENTRY_DSN = config("SENTRY_DSN", default=None)
 LOGS_PATH = config("LOGS_PATH", default="")
 # chat
 MODEL_NAME = config("MODEL_NAME", default="orca-mini-3b.ggmlv3.q4_0.bin")
-MODEL_PATH = config("MODEL_PATH", default=None)
 THREADS = config("THREADS", default=None)
 MAX_TOKENS = config("MAX_TOKENS", default=750, cast=int)
 # embeddings
