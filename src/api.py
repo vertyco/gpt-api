@@ -47,6 +47,25 @@ class ChatInput(BaseModel):
     user: Optional[str] = None
 
 
+class CompletionInput(BaseModel):
+    model: str
+    prompt: str
+    suffix: Optional[str] = None
+    max_tokens: Optional[int] = 16
+    temperature: Optional[float] = 1
+    top_p: Optional[float] = 1
+    n: Optional[int] = 1
+    stream: bool = False
+    logprobs: Optional[int] = None
+    echo: bool = False
+    stop: Optional[Union[str, list]] = None
+    presence_penalty: Optional[float] = None
+    frequency_penalty: Optional[float] = None
+    best_of: int = 1
+    logit_bias: Optional[dict] = None
+    user: Optional[str] = None
+
+
 class EmbedInput(BaseModel):
     model: str
     input: str
@@ -57,17 +76,79 @@ class Tokenizing(BaseModel):
     tokens: list = None
 
 
+@app.post("/v1/completions")
+async def completion(payload: CompletionInput) -> dict:
+    def _run() -> dict:
+        output = ""
+        max_tokens = payload.max_tokens or config.MAX_TOKENS
+        if isinstance(model, GPT4All):
+            log.debug("Using GPT4All")
+            prompt = payload.prompt
+            log.debug(f"Prompt: {prompt}")
+            output = model.generate(
+                prompt=prompt,
+                max_tokens=max_tokens,
+                temp=payload.temperature,
+                top_p=payload.top_p,
+            )
+        elif isinstance(model, QuestionAnsweringPipeline):
+            log.debug("Using question-answering")
+            prompt = payload.prompt
+            split = prompt.split("Context")
+            question = split.pop(-1)
+            context = "Context".join(split)
+            log.debug(f"Question: {question}")
+            log.debug(f"Context: {context}")
+            if context:
+                response = model(
+                    question=question,
+                    context=context,
+                    max_tokens=max_tokens,
+                    max_length=max_tokens,
+                    temperature=payload.temperature,
+                )
+                output = response["answer"] if response else ""
+            else:
+                output = "No context found!"
+        elif isinstance(model, TextGenerationPipeline):
+            log.debug("Using text-generation")
+            prompt = payload.prompt
+            log.debug(f"Prompt: {prompt}")
+            output = model(
+                prompt,
+                max_new_tokens=max_tokens,
+                use_cache=True,
+                max_tokens=max_tokens,
+                max_length=max_tokens,
+                temperature=payload.temperature,
+            )
+        log.debug(f"Output: {output}")
+        response = {
+            "object": "list",
+            "choices": [{"message": {"content": output}}],
+            "model": config.EMBED_MODEL,
+            "usage": {"prompt_tokens": 0, "total_tokens": 0},
+        }
+        return response
+
+    if not model:
+        return {"status": 500, "message": "Model not initialized!"}
+    return await asyncio.to_thread(_run)
+
+
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
     def _run() -> dict:
         output = ""
+        max_tokens = payload.max_tokens or config.MAX_TOKENS
+
         if isinstance(model, GPT4All):
             log.debug("Using GPT4All")
             prompt = compile_messages(payload.messages)
             log.debug(f"Prompt: {prompt}")
             output = model.generate(
                 prompt=prompt,
-                max_tokens=config.MAX_TOKENS,
+                max_tokens=max_tokens,
                 temp=payload.temperature,
                 top_p=payload.top_p,
             )
@@ -80,8 +161,8 @@ async def chat(payload: ChatInput) -> dict:
                 response = model(
                     question=question,
                     context=context,
-                    max_tokens=config.MAX_TOKENS,
-                    max_length=config.MAX_TOKENS,
+                    max_tokens=max_tokens,
+                    max_length=max_tokens,
                     temperature=payload.temperature,
                 )
                 output = response["answer"] if response else ""
@@ -93,10 +174,10 @@ async def chat(payload: ChatInput) -> dict:
             log.debug(f"Prompt: {prompt}")
             output = model(
                 prompt,
-                max_new_tokens=config.MAX_TOKENS,
+                max_new_tokens=max_tokens,
                 use_cache=True,
-                max_tokens=config.MAX_TOKENS,
-                max_length=config.MAX_TOKENS,
+                max_tokens=max_tokens,
+                max_length=max_tokens,
                 temperature=payload.temperature,
             )
         log.debug(f"Output: {output}")
