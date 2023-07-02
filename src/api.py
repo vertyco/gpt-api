@@ -95,21 +95,24 @@ async def completion(payload: CompletionInput) -> dict:
             log.debug("Using question-answering")
             prompt = payload.prompt
             split = prompt.split("Context")
-            question = split.pop(-1)
-            context = "Context".join(split)
-            log.debug(f"Question: {question}")
-            log.debug(f"Context: {context}")
-            if context:
-                response = model(
-                    question=question,
-                    context=context,
-                    max_tokens=max_tokens,
-                    max_length=max_tokens,
-                    temperature=payload.temperature,
-                )
-                output = response["answer"] if response else ""
+            if len(split) < 2:
+                output = "None"
             else:
-                output = "No context found!"
+                question = split.pop(-1)
+                context = "Context".join(split)
+                log.debug(f"Question: {question}")
+                log.debug(f"Context: {context}")
+                if context:
+                    response = model(
+                        question=question,
+                        context=context,
+                        max_tokens=max_tokens,
+                        max_length=max_tokens,
+                        temperature=payload.temperature,
+                    )
+                    output = response["answer"] if response else ""
+                else:
+                    output = "No context found!"
         elif isinstance(model, TextGenerationPipeline):
             log.debug("Using text-generation")
             prompt = payload.prompt
