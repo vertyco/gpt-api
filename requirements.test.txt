@@ -4,3 +4,4 @@ httpx
 openai
 pre-commit
 pytest
+xformers

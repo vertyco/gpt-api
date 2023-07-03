@@ -79,15 +79,14 @@ UVICORN_WORKERS = 1
 SENTRY_DSN =
 LOGS_PATH =
 
-# Either a GPT4All or huggingface Q&A model
+# GPT4All quantized model
 MODEL_NAME = orca-mini-3b.ggmlv3.q4_0.bin
-# Must be a huggingface model for tokenizing (only used with GPT4All models)
+# Must be a huggingface model for tokenizing
 TOKENIZER = deepset/roberta-base-squad2
 THREADS = 1
 MAX_TOKENS = 750
 # huggingface embeddings model
 EMBED_MODEL = all-MiniLM-L12-v2
-LOW_MEMORY = 0
 ```
 
 - Press `CTRL + O` to save, then `CRTL + X` to close out

@@ -9,18 +9,16 @@ from fastapi import FastAPI
 from gpt4all import GPT4All
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, pipeline
-from transformers.pipelines.question_answering import QuestionAnsweringPipeline
-from transformers.pipelines.text_generation import TextGenerationPipeline
+from transformers import AutoTokenizer
 
 try:
     import src.config as config
     from src.logger import init_logging, init_sentry
-    from src.utils import compile_messages, compile_qa_messages, valid_gpt4all_model
+    from src.utils import compile_messages, valid_gpt4all_model
 except ModuleNotFoundError:
     import config
     from logger import init_logging, init_sentry
-    from utils import compile_messages, compile_qa_messages, valid_gpt4all_model
+    from utils import compile_messages, valid_gpt4all_model
 
 
 log = logging.getLogger(__name__)
@@ -81,50 +79,16 @@ async def completion(payload: CompletionInput) -> dict:
     def _run() -> dict:
         output = ""
         max_tokens = payload.max_tokens or config.MAX_TOKENS
-        if isinstance(model, GPT4All):
-            log.debug("Using GPT4All")
-            prompt = payload.prompt
-            log.debug(f"Prompt: {prompt}")
-            output = model.generate(
-                prompt=prompt,
-                max_tokens=max_tokens,
-                temp=payload.temperature,
-                top_p=payload.top_p,
-            )
-        elif isinstance(model, QuestionAnsweringPipeline):
-            log.debug("Using question-answering")
-            prompt = payload.prompt
-            split = prompt.split("Context")
-            if len(split) < 2:
-                output = "None"
-            else:
-                question = split.pop(-1)
-                context = "Context".join(split)
-                log.debug(f"Question: {question}")
-                log.debug(f"Context: {context}")
-                if context:
-                    response = model(
-                        question=question,
-                        context=context,
-                        max_tokens=max_tokens,
-                        max_length=max_tokens,
-                        temperature=payload.temperature,
-                    )
-                    output = response["answer"] if response else ""
-                else:
-                    output = "No context found!"
-        elif isinstance(model, TextGenerationPipeline):
-            log.debug("Using text-generation")
-            prompt = payload.prompt
-            log.debug(f"Prompt: {prompt}")
-            output = model(
-                prompt,
-                max_new_tokens=max_tokens,
-                use_cache=True,
-                max_tokens=max_tokens,
-                max_length=max_tokens,
-                temperature=payload.temperature,
-            )
+
+        prompt = payload.prompt
+        log.debug(f"Prompt: {prompt}")
+        output = model.generate(
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temp=payload.temperature,
+            top_p=payload.top_p,
+        )
+
         log.debug(f"Output: {output}")
         response = {
             "object": "list",
@@ -141,48 +105,21 @@ async def completion(payload: CompletionInput) -> dict:
 
 @app.post("/v1/chat/completions")
 async def chat(payload: ChatInput) -> dict:
+    payload.temperature = max(payload.temperature, 0.01)
+
     def _run() -> dict:
         output = ""
         max_tokens = payload.max_tokens or config.MAX_TOKENS
 
-        if isinstance(model, GPT4All):
-            log.debug("Using GPT4All")
-            prompt = compile_messages(payload.messages)
-            log.debug(f"Prompt: {prompt}")
-            output = model.generate(
-                prompt=prompt,
-                max_tokens=max_tokens,
-                temp=payload.temperature,
-                top_p=payload.top_p,
-            )
-        elif isinstance(model, QuestionAnsweringPipeline):
-            log.debug("Using question-answering")
-            question, context = compile_qa_messages(payload.messages)
-            log.debug(f"Question: {question}")
-            log.debug(f"Context: {context}")
-            if context:
-                response = model(
-                    question=question,
-                    context=context,
-                    max_tokens=max_tokens,
-                    max_length=max_tokens,
-                    temperature=payload.temperature,
-                )
-                output = response["answer"] if response else ""
-            else:
-                output = "No context found!"
-        elif isinstance(model, TextGenerationPipeline):
-            log.debug("Using text-generation")
-            prompt = compile_messages(payload.messages)
-            log.debug(f"Prompt: {prompt}")
-            output = model(
-                prompt,
-                max_new_tokens=max_tokens,
-                use_cache=True,
-                max_tokens=max_tokens,
-                max_length=max_tokens,
-                temperature=payload.temperature,
-            )
+        prompt = compile_messages(payload.messages)
+        log.debug(f"Prompt: {prompt}")
+        output = model.generate(
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temp=payload.temperature,
+            top_p=payload.top_p,
+        )
+
         log.debug(f"Output: {output}")
         response = {
             "object": "list",
@@ -235,27 +172,24 @@ async def startup_event():
         global model
         global embedder
         global tokenizer
-        threads = int(config.THREADS) if config.THREADS else None
-        if valid_gpt4all_model(config.MODEL_NAME, gpt4all_models):
-            log.info(f"Spinning up gpt4all model {config.MODEL_NAME} with {threads} threads")
-            model = GPT4All(
-                model_name=config.MODEL_NAME,
-                model_path=model_path.__str__(),
-                n_threads=threads,
-            )
-            tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER)
-        else:
-            model = pipeline(
-                task="question-answering",
-                model=config.MODEL_NAME,
-                tokenizer=config.MODEL_NAME,
-                low_cpu_mem_usage=config.LOW_MEMORY,
-                use_fast=True,
-            )
-            log.info(f"Model TYPE: {type(model)}")
-            tokenizer = model.tokenizer
 
-        embedder = SentenceTransformer(config.EMBED_MODEL)
+        threads = int(config.THREADS) if config.THREADS else None
+        model = config.MODEL_NAME
+        token_model = config.TOKENIZER if config.TOKENIZER else "deepset/tinyroberta-squad2"
+        embed_model = config.EMBED_MODEL if config.EMBED_MODEL else "all-MiniLM-L12-v2"
+
+        if not valid_gpt4all_model(model, gpt4all_models):
+            model = "orca-mini-3b.ggmlv3.q4_0.bin"
+            log.error(f"Invalid model supplied, defaulting to {model}")
+
+        log.info(f"Spinning up gpt4all model {model} with {threads} threads")
+        model = GPT4All(
+            model_name=model,
+            model_path=model_path.__str__(),
+            n_threads=threads,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(token_model)
+        embedder = SentenceTransformer(embed_model)
 
     init_logging()
     init_sentry(config.SENTRY_DSN)
