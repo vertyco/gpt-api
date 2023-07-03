@@ -1,4 +1,5 @@
 
+accelerate  # May be needed for cuda
 einops
 httpx
 openai
