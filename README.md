@@ -71,13 +71,14 @@ sudo nano .env
 - Paste the example env and edit as desired
 - To get a desired model of your choice:
   - go to [GPT4ALL Model Explorer](https://gpt4all.io/index.html#:~:text=large%20language%20models.-,Model%20Explorer,-nous%2Dhermes%2D13b)
-  - Look thru the models from the dropdown list
+  - Look through the models from the dropdown list
   - Copy the name of the model and past it in the env (MODEL_NAME=GPT4All-13B-snoozy.ggmlv3.q4_0.bin)
 - For SENTRY_DSN
   - Go to sentry.io
   - Sign up and create a project
   - In the Project page select a project and click on the project settings on the top right hand corner of the page
   - Go to Client Keys(DSN) tab and copy your DSN
+
 ```
 # uvicorn
 HOST = 127.0.0.1
