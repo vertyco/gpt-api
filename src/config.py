@@ -11,9 +11,10 @@ SENTRY_DSN = config("SENTRY_DSN", default=None)
 LOGS_PATH = config("LOGS_PATH", default="")
 # GPT4All quantized model
 MODEL_NAME = config("MODEL_NAME", default="orca-mini-3b.ggmlv3.q4_0.bin")
+BATCH_SIZE = config("BATCH_SIZE", default=2048, cast=int)
 # Must be a huggingface model for tokenizing
 TOKENIZER = config("TOKENZIER", default="deepset/tinyroberta-squad2")
-
+# Set to
 THREADS = config("THREADS", default=None)
 MAX_TOKENS = config("MAX_TOKENS", default=750, cast=int)
 # embeddings

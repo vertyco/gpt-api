@@ -90,10 +90,18 @@ LOGS_PATH =
 
 # GPT4All quantized model
 MODEL_NAME = orca-mini-3b.ggmlv3.q4_0.bin
-# Must be a huggingface model for tokenizing
-TOKENIZER = deepset/roberta-base-squad2
+
+# Recommended to set this value to the number of physical CPU cores your system has (as opposed to the number of logical cores)
+THREADS = 1
+
+# Lowering prompt-batch-size reduces RAM usage during processing. However, this can increase the processing time as a trade-off
+BATCH_SIZE = 2048
 THREADS = 1
 MAX_TOKENS = 750
+
+
+# Must be a huggingface model for tokenizing
+TOKENIZER = deepset/roberta-base-squad2
 # huggingface embeddings model
 EMBED_MODEL = all-MiniLM-L12-v2
 ```
@@ -144,11 +152,17 @@ sudo systemctl enable gptapi
 sudo systemctl start gptapi
 ```
 
-# Deploying on Portainer with docker-compose
+# Deploying with Docker
 
-If using portainer's env variables, use `stack.env` for the `env_file` arg, otherwise specify the path to your env file.
+### Building from source
 
-## Pulling from docker images
+1. `git clone https://github.com/vertyco/gpt-api.git`
+2. `cd gpt-api`
+3. `docker compose -f docker-compose.local.yml up`
+
+## Portainer + pulling from image
+
+If running in Portainer, use `stack.env` for the `env_file` arg, otherwise specify the path to your env file.
 
 ```yml
 version: "3.8"
@@ -160,12 +174,10 @@ services:
     ports:
       - 8100:8100
     env_file:
-      - stack.env
+      - ./.env
 ```
 
-## Building from repo
-
-The repo's docker-compose file can be used with the `Repository` option in Portainers stack UI which will build the image from source.
+The repo's docker-compose file can be used with the `Repository` option in Portainers stack UI which will build the image from source. just specify `docker-compose.portainer.yml` for the compose filename.
 
 # NOTES
 

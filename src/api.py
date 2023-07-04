@@ -87,6 +87,7 @@ async def completion(payload: CompletionInput) -> dict:
             max_tokens=max_tokens,
             temp=payload.temperature,
             top_p=payload.top_p,
+            n_batch=config.BATCH_SIZE,
         )
 
         log.debug(f"Output: {output}")
@@ -118,6 +119,7 @@ async def chat(payload: ChatInput) -> dict:
             max_tokens=max_tokens,
             temp=payload.temperature,
             top_p=payload.top_p,
+            n_batch=config.BATCH_SIZE,
         )
 
         log.debug(f"Output: {output}")
