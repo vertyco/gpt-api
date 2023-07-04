@@ -78,11 +78,16 @@ sudo nano .env
   - Sign up and create a project
   - In the Project page select a project and click on the project settings on the top right hand corner of the page
   - Go to Client Keys(DSN) tab and copy your DSN
+- Threads vs Workers:
+  - More workers = handles multiple connections
+  - More threads = makes responses faster
+  - Unless you have a ton of ram and processing power, its recommended to only use 1 worker
 
 ```
 # uvicorn
 HOST = 127.0.0.1
-UVICORN_WORKERS = 1
+# THIS SHOULD ALMOST NEVER BE MORE THAN 1
+WORKERS = 1
 
 # logging
 SENTRY_DSN =
