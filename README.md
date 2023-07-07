@@ -9,6 +9,77 @@
 ![license](https://img.shields.io/github/license/Vertyco/Vrt-Cogs?style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/Vertyco/gpt-api?color=cyan&style=for-the-badge)
 
+## Deploying as a service (Windows 10)
+
+_Run the following commands to get the api up and running on your Windows 10 machine_
+
+### Update Windows and Install Required Software
+
+1. Ensure your Windows 10 is up-to-date by checking for updates in the Windows Update settings.
+2. Download and install [Python 3.11](https://www.python.org/downloads/) from the official Python website.
+3. Install [Git](https://git-scm.com/download/win) for Windows.
+
+### Clone The Repo
+
+Open Command Prompt or PowerShell and run the following command:
+
+```shell
+git clone https://github.com/vertyco/gpt-api.git
+```
+
+### Create/Activate Virtual Environment
+
+Navigate to the cloned repository and create a virtual environment:
+
+```shell
+cd gpt-api
+python -m venv env
+```
+
+Activate the virtual environment:
+
+```shell
+.\env\Scripts\activate
+```
+
+### Install requirements
+
+Upgrade pip and install the required packages:
+
+```shell
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Configure `.env` File
+
+Create a new `.env` file in the root directory of the project and open it with a text editor of your choice. Paste the example env and edit as desired. Save and close the file when you're done.
+
+### Run the API
+
+You can now run the API with the following command:
+
+```shell
+python -m uvicorn src.api:app --host localhost
+```
+
+To make the API accessible from other devices on your network, change `--host localhost` to `--host 0.0.0.0`.
+
+### Running the API as a Windows Task
+
+To run the API as a Windows task, you can use the Task Scheduler:
+
+1. Create a new batch file (e.g., `start_api.bat`) in the project root directory with the following content:
+
+```batch
+@echo off
+cd /d %~dp0
+call .\env\Scripts\activate
+python -m uvicorn src.api:app --host localhost
+```
+
+2. Open Task Scheduler and create a new task that runs `start_api.bat` at startup or at a specific time.
+
 ## Deploying as a service (Ubuntu 22.04)
 
 _Run the following commands to get the api up and running on your server_
@@ -183,16 +254,6 @@ services:
 ```
 
 The repo's docker-compose file can be used with the `Repository` option in Portainers stack UI which will build the image from source. just specify `docker-compose.portainer.yml` for the compose filename.
-
-# NOTES
-
-- If running on a VM, make sure the output of `cat /proc/cpuinfo | grep avx` is showing the AVX flag for your CPU, if running proxmox, make sure to set CPU type to `host` in the VM's hardware settings.
-- Run `sudo systemctl status gptapi` to check the service's status
-- To view debugging info as it comes in, while in the project root run `tail -f debug-logs.log`
-- The
-
-<br/>
-<br/>
 
 _This API was written for the Assistant cog for Red Discord-Bot_
 <br/>
