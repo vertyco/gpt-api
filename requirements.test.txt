@@ -1,6 +1,7 @@
 
 accelerate  # May be needed for cuda
 einops
+github.py
 httpx
 openai
 pre-commit

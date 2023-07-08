@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -23,9 +24,14 @@ except ModuleNotFoundError:
 
 log = logging.getLogger(__name__)
 app = FastAPI(title="GPT API")
-model_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / "models"
-model_path.mkdir(exist_ok=True)
 gpt4all_models = GPT4All.list_models()
+
+model_path = Path(os.path.dirname(os.path.abspath(sys.executable)))
+if not getattr(sys, "frozen", False) and not hasattr(sys, "_MEIPASS"):
+    model_path = model_path.parent.parent
+
+model_path = model_path / "models"
+model_path.mkdir(exist_ok=True)
 
 
 class ChatInput(BaseModel):

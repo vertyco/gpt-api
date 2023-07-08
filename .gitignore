@@ -163,3 +163,4 @@ build.txt
 scratch.py
 *.bin
 scratches/
+build.py

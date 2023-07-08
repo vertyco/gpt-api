@@ -230,6 +230,8 @@ sudo systemctl start gptapi
 
 # Deploying with Docker
 
+The docker version may or may not work for you, but this is how you could set it up...
+
 ### Building from source
 
 1. `git clone https://github.com/vertyco/gpt-api.git`
