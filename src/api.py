@@ -147,7 +147,7 @@ async def embed(payload: EmbedInput) -> dict:
     embedding = await asyncio.to_thread(embedder.embed, payload.input)
     response = {
         "object": "list",
-        "data": [{"object": "embedding", "embedding": embedding.tolist(), "index": 0}],
+        "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
         "model": config.EMBED_MODEL,
         "usage": {"prompt_tokens": 0, "total_tokens": 0},
     }
