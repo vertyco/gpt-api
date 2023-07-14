@@ -7,9 +7,8 @@ from typing import List, Optional, Union
 
 import uvicorn
 from fastapi import FastAPI
-from gpt4all import GPT4All
+from gpt4all import Embed4All, GPT4All
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
 
 try:
@@ -100,7 +99,7 @@ async def completion(payload: CompletionInput) -> dict:
         response = {
             "object": "list",
             "choices": [{"message": {"content": output}}],
-            "model": config.EMBED_MODEL,
+            "model": config.MODEL_NAME,
             "usage": {"prompt_tokens": 0, "total_tokens": 0},
         }
         return response
@@ -132,7 +131,7 @@ async def chat(payload: ChatInput) -> dict:
         response = {
             "object": "list",
             "choices": [{"message": {"content": output}}],
-            "model": config.EMBED_MODEL,
+            "model": config.MODEL_NAME,
             "usage": {"prompt_tokens": 0, "total_tokens": 0},
         }
         return response
@@ -145,7 +144,7 @@ async def chat(payload: ChatInput) -> dict:
 @app.post("/v1/embeddings")
 async def embed(payload: EmbedInput) -> dict:
     log.debug(f"Incoming text: {payload.input}")
-    embedding = await asyncio.to_thread(embedder.encode, payload.input)
+    embedding = await asyncio.to_thread(embedder.embed, payload.input)
     response = {
         "object": "list",
         "data": [{"object": "embedding", "embedding": embedding.tolist(), "index": 0}],
@@ -171,7 +170,7 @@ async def get_text(payload: Tokenizing) -> dict:
 
 @app.get("/v1/model")
 async def get_model() -> dict:
-    return {"model": config.MODEL_NAME, "embed_model": config.EMBED_MODEL}
+    return {"model": config.MODEL_NAME}
 
 
 @app.on_event("startup")
@@ -184,7 +183,6 @@ async def startup_event():
         threads = int(config.THREADS) if config.THREADS else None
         model = config.MODEL_NAME
         token_model = config.TOKENIZER if config.TOKENIZER else "deepset/tinyroberta-squad2"
-        embed_model = config.EMBED_MODEL if config.EMBED_MODEL else "all-MiniLM-L12-v2"
 
         if not valid_gpt4all_model(model, gpt4all_models):
             model = "orca-mini-3b.ggmlv3.q4_0.bin"
@@ -196,8 +194,8 @@ async def startup_event():
             model_path=model_path.__str__(),
             n_threads=threads,
         )
+        embedder = Embed4All()
         tokenizer = AutoTokenizer.from_pretrained(token_model)
-        embedder = SentenceTransformer(embed_model)
 
     init_logging()
     init_sentry(config.SENTRY_DSN)

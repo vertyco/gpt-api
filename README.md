@@ -172,14 +172,11 @@ THREADS = 1
 
 # Lowering prompt-batch-size reduces RAM usage during processing. However, this can increase the processing time as a trade-off
 BATCH_SIZE = 2048
-THREADS = 1
 MAX_TOKENS = 750
 
 
 # Must be a huggingface model for tokenizing
 TOKENIZER = deepset/roberta-base-squad2
-# huggingface embeddings model
-EMBED_MODEL = all-MiniLM-L12-v2
 ```
 
 - Press `CTRL + O` to save, then `CRTL + X` to close out
