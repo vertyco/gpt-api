@@ -148,7 +148,7 @@ async def embed(payload: EmbedInput) -> dict:
     response = {
         "object": "list",
         "data": [{"object": "embedding", "embedding": embedding, "index": 0}],
-        "model": config.EMBED_MODEL,
+        "model": "ggml-all-MiniLM-L6-v2-f16",
         "usage": {"prompt_tokens": 0, "total_tokens": 0},
     }
     return response
