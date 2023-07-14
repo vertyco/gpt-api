@@ -4,4 +4,5 @@ gpt4all==1.0.5
 python-decouple
 python-dotenv
 sentry_sdk
+transformers
 uvicorn
